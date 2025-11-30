@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>迴譯鏡 — 讓原文更清澈</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Sans+TC:wght@300;400;500&family=Noto+Serif+TC:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --forest-deep: #2d4a3e;
+            --forest-mid: #4a7c6f;
+            --moss: #7a9e7e;
+            --sage: #a8c4a2;
+            --gold-muted: #c9a962;
+            --gold-hover: #d4b872;
+            --error-bg: rgba(180, 100, 100, 0.1);
+            --error-border: rgba(180, 100, 100, 0.3);
+            --error-text: #c45555;
+        }
+
+        /* Dark Mode (Default) */
+        :root {
+            --bg-primary: #1a1f1c;
+            --bg-secondary: #232a26;
+            --bg-card: #2a322d;
+            --bg-input: #1e2522;
+            --border-color: rgba(122, 158, 126, 0.2);
+            --border-hover: rgba(122, 158, 126, 0.4);
+            --text-primary: #e8ece9;
+            --text-secondary: #a8b5ac;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Light Mode */
+        [data-theme="light"] {
+            --bg-primary: #f8f6f0;
+            --bg-secondary: #fefdfb;
+            --bg-card: #fefdfb;
+            --bg-input: #fefdfb;
+            --border-color: rgba(74, 124, 111, 0.15);
+            --border-hover: rgba(74, 124, 111, 0.3);
+            --text-primary: #2c3e35;
+            --text-secondary: #5a6b62;
+            --shadow-color: rgba(45, 74, 62, 0.08);
+            --forest-deep: #2d4a3e;
+            --forest-mid: #4a7c6f;
+            --gold-muted: #c9a962;
+            --gold-hover: #b8944f;
+            --error-text: #8b4545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* 自然紋理背景 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(122, 158, 126, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(74, 124, 111, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 60% 40%, rgba(201, 169, 98, 0.03) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 標題區 */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-top: 0.5rem;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            color: var(--forest-mid);
+        }
+
+        h1 {
+            font-family: 'Noto Serif TC', 'Cormorant Garamond', serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--forest-mid);
+            letter-spacing: 0.1em;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+            margin-top: 0.3rem;
+            letter-spacing: 0.05em;
+        }
+
+        /* 主要輸入區 */
+        .input-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem 1.25rem 1.25rem;
+            box-shadow: 0 4px 20px var(--shadow-color);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .input-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .input-label svg {
+            width: 14px;
+            height: 14px;
+            color: var(--moss);
+        }
+
+        .input-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .control-group label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .api-input {
+            width: 150px;
+            padding: 0.4rem 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-family: 'Courier New', monospace;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .api-input:focus {
+            outline: none;
+            border-color: var(--forest-mid);
+            box-shadow: 0 0 0 3px rgba(74, 124, 111, 0.15);
+        }
+
+        .api-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--forest-mid);
+        }
+
+        .source-textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.7;
+            resize: vertical;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .source-textarea:focus {
+            outline: none;
+            border-color: var(--forest-mid);
+            box-shadow: 0 0 0 4px rgba(74, 124, 111, 0.1);
+        }
+
+        .source-textarea::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .input-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .input-controls {
+                width: 100%;
+            }
+            .control-group {
+                flex: 1;
+                min-width: 100px;
+            }
+            .api-input {
+                width: 100%;
+                flex: 1;
+            }
+        }
+
+        /* 執行按鈕 */
+        .action-bar {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            margin: 1.25rem 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 3px 12px var(--shadow-color);
+        }
+
+        .btn svg {
+            width: 14px;
+            height: 14px;
+            transition: transform 0.3s ease;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--shadow-color);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--forest-mid) 0%, var(--forest-deep) 100%);
+            color: #fff;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold-muted) 0%, #a68942 100%);
+            color: #1a1f1c;
+        }
+
+        .btn-cancel {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+        }
+
+        .btn-cancel:hover:not(:disabled) {
+            border-color: var(--error-border);
+            color: var(--error-text);
+            box-shadow: none;
+            transform: none;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+
+        /* Loading 動畫 */
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .btn-gold .spinner {
+            border-color: rgba(26, 31, 28, 0.3);
+            border-top-color: #1a1f1c;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 訊息區 */
+        .message-box {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+            animation: fadeIn 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .message-box.visible {
+            display: block;
+        }
+
+        .message-box.error {
+            background: var(--error-bg);
+            border: 1px solid var(--error-border);
+            color: var(--error-text);
+        }
+
+        .message-box.info {
+            background: rgba(74, 124, 111, 0.1);
+            border: 1px solid rgba(74, 124, 111, 0.3);
+            color: var(--forest-mid);
+        }
+
+        /* 進度區域 */
+        .progress-section {
+            display: none;
+            margin-bottom: 1.25rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-section.visible {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .progress-title {
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .progress-status {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(74, 124, 111, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--forest-mid), var(--gold-muted));
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .progress-steps {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .step-badge {
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .step-badge.active {
+            background: var(--forest-mid);
+            color: #fff;
+            border-color: var(--forest-mid);
+        }
+
+        .step-badge.done {
+            background: rgba(122, 158, 126, 0.2);
+            color: var(--moss);
+            border-color: var(--moss);
+        }
+
+        /* 結果區域 */
+        .results-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .results-section.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .result-card {
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 2px 12px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            box-shadow: 0 4px 20px var(--shadow-color);
+        }
+
+        .result-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* 可摺疊卡片 - 更緊湊 */
+        .result-card.collapsible {
+            padding: 0.75rem 1rem;
+        }
+
+        .result-card.collapsible .card-header {
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .result-card.collapsible .card-header:hover {
+            color: var(--forest-mid);
+        }
+
+        .result-card.collapsible .card-content {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+            margin-top: 0;
+        }
+
+        .result-card.collapsible.expanded {
+            padding: 1rem;
+        }
+
+        .result-card.collapsible.expanded .card-header {
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .result-card.collapsible.expanded .card-content {
+            max-height: 1000px;
+            opacity: 1;
+            margin-top: 0;
+        }
+
+        .collapse-icon {
+            width: 14px;
+            height: 14px;
+            margin-left: auto;
+            transition: transform 0.3s ease;
+            color: var(--text-secondary);
+        }
+
+        .result-card.collapsible.expanded .collapse-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 主輸出卡片 - 更大的 padding */
+        .result-card.card-revised,
+        .result-card.card-final {
+            padding: 1.25rem;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-header svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .card-header h3 {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--gold-muted);
+            margin-left: auto;
+        }
+
+        .card-content {
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+        }
+
+        /* 主輸出卡片 - 更大的字體 */
+        .card-revised .card-content,
+        .card-final .card-content {
+            font-size: 1.1rem;
+            line-height: 1.9;
+        }
+
+        /* 特殊卡片樣式 */
+        .card-translation1 .card-header svg { color: var(--forest-mid); }
+        .card-translation2 .card-header svg { color: var(--moss); }
+        .card-comparison .card-header svg { color: var(--gold-muted); }
+        .card-suggestion .card-header svg { color: var(--gold-muted); }
+
+        .card-suggestion {
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(201, 169, 98, 0.08) 100%);
+            border-color: rgba(201, 169, 98, 0.25);
+        }
+
+        .card-revised {
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(122, 158, 126, 0.1) 100%);
+            border-color: rgba(74, 124, 111, 0.3);
+        }
+
+        .card-revised .card-header svg { color: var(--forest-mid); }
+
+        .card-final {
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(93, 148, 133, 0.1) 100%);
+            border-color: rgba(93, 148, 133, 0.3);
+        }
+
+        .card-final .card-header svg { color: var(--forest-mid); }
+
+        .revised-textarea {
+            width: 100%;
+            min-height: 180px;
+            padding: 1.25rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.9;
+            resize: vertical;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .revised-textarea:focus {
+            outline: none;
+            border-color: var(--forest-mid);
+            box-shadow: 0 0 0 3px rgba(74, 124, 111, 0.15);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-icon svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        /* 歷史區域 */
+        .history-section {
+            display: none;
+            margin-bottom: 1.25rem;
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 2px 12px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .history-section.visible {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .history-header {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-header svg {
+            width: 14px;
+            height: 14px;
+            color: var(--gold-muted);
+        }
+
+        .history-header h3 {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .history-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto 1fr;
+            gap: 0.5rem;
+            align-items: start;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .history-item {
+                grid-template-columns: 1fr;
+            }
+            .history-arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        .history-round {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gold-muted);
+            white-space: nowrap;
+        }
+
+        .history-label {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+        }
+
+        .history-text {
+            color: var(--text-primary);
+        }
+
+        .history-arrow {
+            color: var(--moss);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 0.2rem;
+        }
+
+        .history-arrow svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* 主題切換 */
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--border-hover);
+            transform: scale(1.05);
+        }
+
+        .theme-toggle svg {
+            width: 16px;
+            height: 16px;
+            color: var(--gold-muted);
+        }
+
+        .theme-toggle .sun-icon { display: none; }
+        .theme-toggle .moon-icon { display: block; }
+        [data-theme="light"] .theme-toggle .sun-icon { display: block; }
+        [data-theme="light"] .theme-toggle .moon-icon { display: none; }
+
+        /* 動畫 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 裝飾葉子 */
+        .floating-leaf {
+            position: fixed;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        [data-theme="light"] .floating-leaf { opacity: 0.05; }
+        .leaf-1 {
+            top: 15%;
+            left: 3%;
+            width: 80px;
+            animation: float 8s ease-in-out infinite;
+        }
+        .leaf-2 {
+            bottom: 20%;
+            right: 5%;
+            width: 60px;
+            animation: float 10s ease-in-out infinite reverse;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        /* API 安全提示 */
+        .api-hint {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            opacity: 0.6;
+            margin-top: 0.4rem;
+        }
+
+        .api-hint svg {
+            width: 10px;
+            height: 10px;
+            vertical-align: middle;
+            margin-right: 0.2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主題切換按鈕 -->
+    <button class="theme-toggle" id="themeToggle" title="切換明暗模式">
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+    </button>
+
+    <!-- 裝飾性葉子 -->
+    <svg class="floating-leaf leaf-1" viewBox="0 0 100 100" fill="currentColor" style="color: var(--moss);">
+        <path d="M50 5 Q80 25 85 50 Q80 75 50 95 Q20 75 15 50 Q20 25 50 5 M50 20 Q50 50 50 80"/>
+    </svg>
+    <svg class="floating-leaf leaf-2" viewBox="0 0 100 100" fill="currentColor" style="color: var(--forest-mid);">
+        <path d="M50 5 Q80 25 85 50 Q80 75 50 95 Q20 75 15 50 Q20 25 50 5 M50 20 Q50 50 50 80"/>
+    </svg>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v12M6 12h12"/>
+                    <circle cx="12" cy="12" r="4"/>
+                </svg>
+                <h1>迴譯鏡</h1>
+            </div>
+            <p class="subtitle">透過回譯，照見原文的模糊之處</p>
+        </header>
+
+        <div class="input-section">
+            <div class="input-header">
+                <label class="input-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    原文
+                </label>
+                <div class="input-controls">
+                    <div class="control-group">
+                        <label for="apiKey">API Key</label>
+                        <input type="password" id="apiKey" class="api-input" placeholder="sk-ant-api03-...">
+                    </div>
+                    <div class="control-group">
+                        <label for="targetLang">目標語言</label>
+                        <select id="targetLang" class="lang-select">
+                            <option value="English">英文</option>
+                            <option value="Japanese">日文</option>
+                            <option value="Traditional Chinese (Taiwan)">繁體中文（台灣）</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <textarea 
+                id="sourceText" 
+                class="source-textarea" 
+                placeholder="請輸入您想要檢查的原文...&#10;&#10;AI 將透過「翻譯 → 回譯 → 比對」的流程，幫助您發現原文中可能造成誤解的地方。"
+            ></textarea>
+            <p class="api-hint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                API Key 僅存於本機瀏覽器，不會傳送至任何第三方伺服器
+            </p>
+        </div>
+
+        <div class="action-bar">
+            <button id="analyzeBtn" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                </svg>
+                單次分析
+            </button>
+            <button id="autoAnalyzeBtn" class="btn btn-gold">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+                    <path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+                </svg>
+                循環優化 ×3
+            </button>
+            <button id="cancelBtn" class="btn btn-cancel" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                取消
+            </button>
+        </div>
+
+        <div class="message-box" id="messageBox"></div>
+
+        <div class="progress-section" id="progressSection">
+            <div class="progress-header">
+                <span class="progress-title" id="progressTitle">正在分析...</span>
+                <span class="progress-status" id="progressStatus">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-steps" id="progressSteps"></div>
+        </div>
+
+        <div class="history-section" id="historySection">
+            <div class="history-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <h3>優化歷程</h3>
+            </div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-grid">
+                <div class="result-card card-translation1 collapsible" data-card="translation1">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/>
+                        </svg>
+                        <h3>譯文（正向翻譯）</h3>
+                        <span class="card-number">01</span>
+                        <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </div>
+                    <div class="card-content" id="translation1">—</div>
+                </div>
+
+                <div class="result-card card-translation2 collapsible" data-card="translation2">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="17 1 21 5 17 9"/>
+                            <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                            <polyline points="7 23 3 19 7 15"/>
+                            <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                        </svg>
+                        <h3>回譯</h3>
+                        <span class="card-number">02</span>
+                        <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </div>
+                    <div class="card-content" id="translation2">—</div>
+                </div>
+
+                <div class="result-card card-comparison full-width collapsible" data-card="comparison">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="M21 21l-4.35-4.35"/>
+                            <path d="M11 8v6M8 11h6"/>
+                        </svg>
+                        <h3>差異分析</h3>
+                        <span class="card-number">03</span>
+                        <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </div>
+                    <div class="card-content" id="comparison">—</div>
+                </div>
+
+                <div class="result-card card-suggestion full-width collapsible" data-card="suggestion">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M12 22V12"/>
+                            <circle cx="12" cy="8" r="2"/>
+                        </svg>
+                        <h3>修改建議</h3>
+                        <span class="card-number">04</span>
+                        <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </div>
+                    <div class="card-content" id="suggestion">—</div>
+                </div>
+
+                <div class="result-card card-revised full-width">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <path d="M9 15l2 2 4-4"/>
+                        </svg>
+                        <h3>修正後原文</h3>
+                        <span class="card-number">05</span>
+                    </div>
+                    <textarea class="revised-textarea" id="revisedText" placeholder="修正後的原文將顯示於此..."></textarea>
+                    <div class="card-actions">
+                        <button class="btn btn-primary btn-small btn-icon" id="copyRevisedBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            複製
+                        </button>
+                        <button class="btn btn-gold btn-small btn-icon" id="cycleBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+                                <path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+                            </svg>
+                            循環分析
+                        </button>
+                    </div>
+                </div>
+
+                <div class="result-card card-final full-width">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/>
+                        </svg>
+                        <h3>修正後譯文</h3>
+                        <span class="card-number">06</span>
+                    </div>
+                    <div class="card-content" id="finalTranslation">—</div>
+                    <div class="card-actions">
+                        <button class="btn btn-primary btn-small btn-icon" id="copyFinalBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            複製
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ===== 配置常數 =====
+    const CONFIG = {
+        API_URL: 'https://api.anthropic.com/v1/messages',
+        MODEL: 'claude-sonnet-4-20250514',
+        MAX_TOKENS: 4096,
+        RETRY_ATTEMPTS: 3,
+        RETRY_DELAY: 1500,
+        STORAGE_KEYS: {
+            API_KEY: 'backtranslation_api_key',
+            THEME: 'backtranslation_theme'
+        }
+    };
+
+    // ===== 狀態管理 =====
+    const state = {
+        isProcessing: false,
+        isCancelled: false,
+        currentRound: 0,
+        totalRounds: 0,
+        history: []
+    };
+
+    // ===== DOM 元素快取 =====
+    const dom = {
+        themeToggle: document.getElementById('themeToggle'),
+        apiKey: document.getElementById('apiKey'),
+        targetLang: document.getElementById('targetLang'),
+        sourceText: document.getElementById('sourceText'),
+        analyzeBtn: document.getElementById('analyzeBtn'),
+        autoAnalyzeBtn: document.getElementById('autoAnalyzeBtn'),
+        cancelBtn: document.getElementById('cancelBtn'),
+        messageBox: document.getElementById('messageBox'),
+        progressSection: document.getElementById('progressSection'),
+        progressTitle: document.getElementById('progressTitle'),
+        progressStatus: document.getElementById('progressStatus'),
+        progressFill: document.getElementById('progressFill'),
+        progressSteps: document.getElementById('progressSteps'),
+        historySection: document.getElementById('historySection'),
+        historyList: document.getElementById('historyList'),
+        resultsSection: document.getElementById('resultsSection'),
+        translation1: document.getElementById('translation1'),
+        translation2: document.getElementById('translation2'),
+        comparison: document.getElementById('comparison'),
+        suggestion: document.getElementById('suggestion'),
+        revisedText: document.getElementById('revisedText'),
+        finalTranslation: document.getElementById('finalTranslation'),
+        copyRevisedBtn: document.getElementById('copyRevisedBtn'),
+        copyFinalBtn: document.getElementById('copyFinalBtn'),
+        cycleBtn: document.getElementById('cycleBtn')
+    };
+
+    // ===== 工具函數 =====
+    const utils = {
+        escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        },
+
+        truncate(text, maxLength = 100) {
+            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        },
+
+        sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        },
+
+        parseJSON(text) {
+            if (!text || typeof text !== 'string') {
+                throw new Error('API 回應為空');
+            }
+
+            // 清理可能的 markdown 包裹
+            let cleaned = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+            
+            // 嘗試找到 JSON 物件的起始和結束
+            const startIndex = cleaned.indexOf('{');
+            const endIndex = cleaned.lastIndexOf('}');
+            
+            if (startIndex === -1 || endIndex === -1) {
+                console.error('Raw API response:', text);
+                throw new Error('API 回應格式異常，請重試');
+            }
+            
+            cleaned = cleaned.substring(startIndex, endIndex + 1);
+            
+            try {
+                return JSON.parse(cleaned);
+            } catch (e) {
+                console.error('JSON parse error:', e.message);
+                console.error('Cleaned content:', cleaned.substring(0, 500));
+                throw new Error('JSON 解析失敗，請重試');
+            }
+        }
+    };
+
+    // ===== UI 控制 =====
+    const ui = {
+        showMessage(message, type = 'error') {
+            dom.messageBox.textContent = message;
+            dom.messageBox.className = `message-box visible ${type}`;
+        },
+
+        hideMessage() {
+            dom.messageBox.classList.remove('visible');
+        },
+
+        setProcessing(processing, mode = 'single') {
+            state.isProcessing = processing;
+            dom.analyzeBtn.disabled = processing;
+            dom.autoAnalyzeBtn.disabled = processing;
+            dom.cancelBtn.style.display = processing ? 'inline-flex' : 'none';
+
+            if (processing) {
+                if (mode === 'single') {
+                    dom.analyzeBtn.innerHTML = '<div class="spinner"></div>分析中...';
+                } else {
+                    dom.autoAnalyzeBtn.innerHTML = '<div class="spinner"></div>優化中...';
+                }
+            } else {
+                dom.analyzeBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                    </svg>
+                    單次分析
+                `;
+                dom.autoAnalyzeBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+                        <path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+                    </svg>
+                    循環優化 ×3
+                `;
+            }
+        },
+
+        updateProgress(current, total, stepName = '') {
+            const percent = Math.round((current / total) * 100);
+            dom.progressFill.style.width = `${percent}%`;
+            dom.progressStatus.textContent = `${percent}%`;
+            dom.progressTitle.textContent = stepName || `第 ${current}/${total} 輪`;
+        },
+
+        initProgressSteps(total) {
+            dom.progressSteps.innerHTML = '';
+            for (let i = 1; i <= total; i++) {
+                const badge = document.createElement('span');
+                badge.className = 'step-badge';
+                badge.textContent = `第 ${i} 輪`;
+                badge.id = `step-${i}`;
+                dom.progressSteps.appendChild(badge);
+            }
+        },
+
+        updateStepStatus(round, status) {
+            const badge = document.getElementById(`step-${round}`);
+            if (badge) {
+                badge.className = `step-badge ${status}`;
+            }
+        },
+
+        showProgress(show) {
+            dom.progressSection.classList.toggle('visible', show);
+        },
+
+        showHistory(show) {
+            dom.historySection.classList.toggle('visible', show);
+        },
+
+        showResults(show) {
+            dom.resultsSection.classList.toggle('visible', show);
+        },
+
+        addHistoryItem(round, original, revised) {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `
+                <div class="history-round">第 ${round} 輪</div>
+                <div>
+                    <div class="history-label">輸入原文</div>
+                    <div class="history-text">${utils.escapeHtml(utils.truncate(original))}</div>
+                </div>
+                <div class="history-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="history-label">修正後</div>
+                    <div class="history-text">${utils.escapeHtml(utils.truncate(revised))}</div>
+                </div>
+            `;
+            dom.historyList.appendChild(item);
+        },
+
+        clearHistory() {
+            dom.historyList.innerHTML = '';
+            state.history = [];
+        },
+
+        updateResults(result) {
+            dom.translation1.textContent = result.translation1 || '—';
+            dom.translation2.textContent = result.translation2 || '—';
+            dom.comparison.textContent = result.comparison || '—';
+            dom.suggestion.textContent = result.suggestion || '—';
+            dom.revisedText.value = result.revisedText || '';
+            dom.finalTranslation.textContent = result.finalTranslation || '—';
+        },
+
+        async copyToClipboard(text, button) {
+            if (!text || text === '—') return;
+            
+            try {
+                await navigator.clipboard.writeText(text);
+                const originalHTML = button.innerHTML;
+                button.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                    已複製
+                `;
+                button.style.background = 'var(--moss)';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                    button.style.background = '';
+                }, 2000);
+            } catch (err) {
+                console.error('複製失敗:', err);
+                ui.showMessage('複製失敗，請手動選取複製');
+            }
+        },
+
+        scrollTo(element) {
+            setTimeout(() => {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    };
+
+    // ===== API 服務 =====
+    const api = {
+        buildPrompt(sourceText, targetLang) {
+            return `你是一位專業的翻譯品質分析師與資深譯者。請按照以下步驟處理用戶提供的原文：
+
+【最重要原則：語言一致性】
+⚠️ 「修正後原文 (revisedText)」必須與輸入的原文使用【完全相同的語言】！
+- 若原文是英文，修正後原文必須是英文
+- 若原文是日文，修正後原文必須是日文
+- 若原文是中文，修正後原文必須是中文
+- 絕對禁止將修正後原文翻譯成其他語言
+
+【翻譯品質三大核心要求】
+
+一、精準度 (Accuracy)
+- 完整傳達原文的語意，不遺漏、不增添、不扭曲
+- 專業術語需使用目標語言地區的標準譯法
+- 數字、日期、單位需依目標語言習慣轉換格式
+- 語氣強弱、正式程度需與原文一致
+
+二、自然流暢度 (Fluency)
+- 譯文必須讀起來像是目標語言的原生文章，而非翻譯腔
+- 句式結構需符合目標語言的表達習慣，必要時重組句子
+- 避免生硬的逐字翻譯，優先考慮意譯以達到自然表達
+- 連接詞、轉折語需符合目標語言的行文邏輯
+
+三、在地化 (Localization)
+- 台灣繁體中文：使用台灣用語（軟體、影片、資訊、網路），符合台灣口語習慣，人名地名用台灣譯法
+- 英文：區分美式/英式拼寫與用語，使用道地的英文表達，避免中式英文
+- 日文：適當使用敬語體系，區分書面語/口語，漢字與假名比例需自然
+
+【各目標語言特別注意事項】
+
+若目標語言是「繁體中文（台灣）」：
+- 嚴禁大陸用語：軟件→軟體、視頻→影片、信息→資訊、網絡→網路、數據→資料、程序→程式、優化→最佳化、交互→互動
+- 使用台灣慣用句式，避免歐化中文（如過度使用「的」、被動句）
+- 標點符號使用全形，遵循台灣標點規範
+
+若目標語言是「English」：
+- 使用自然的英文句式，主詞明確，動詞有力
+- 避免過長的從句，適時斷句
+- 選用精確的動詞和形容詞，避免模糊表達
+- 慣用語和片語需道地自然
+
+若目標語言是「Japanese」：
+- 根據文體選擇適當的敬語層級（です/ます體、だ/である體）
+- 主語常可省略，避免每句都明示主語
+- 適當使用助詞，句末表達需自然
+- 外來語片假名需使用日本慣用寫法
+
+【翻譯與修改原則】
+- 嚴禁過度推論或腦補原文沒有的意思
+- 嚴禁擅自增加或刪減原文的資訊
+- 修改分為兩個層次：
+  1. 語意修正：針對「語意不清」或「容易造成誤解」的部分（優先處理）
+  2. 潤飾建議：讓文字更自然、流暢（在語意清晰的前提下進行）
+- 修正後原文必須保留原文的所有資訊，且使用原文的語言
+
+【分析步驟】
+1. **自動偵測原文語言**（記住這個語言，修正後原文必須使用此語言）
+2. **正向翻譯**：將原文翻譯成 ${targetLang}，嚴格遵守上述翻譯品質要求
+3. **回譯**：⚠️ 關鍵步驟 ⚠️ 
+   - 將「譯文一」翻譯回原文的語言
+   - 【絕對禁止】在此步驟參考或回顧使用者的原文
+   - 必須純粹根據「譯文一」的內容進行翻譯，如同你從未見過原文
+   - 這是「盲測」，用以檢驗正向翻譯是否準確傳達原意
+4. **差異分析**：客觀比較「原文」與「回譯結果」之間的語意差異
+5. **修改建議**：說明是否需要語意修正，以及潤飾建議
+6. **修正後原文**：使用【原文的語言】，根據建議調整後的版本
+7. **修正後譯文**：將修正後原文翻譯成 ${targetLang}，務必達到專業出版級品質，讀起來必須像母語人士撰寫的原生文章
+
+請以 JSON 格式回覆：
+{
+  "detectedLanguage": "偵測到的原文語言",
+  "translation1": "正向翻譯結果（專業級品質）",
+  "translation2": "回譯結果（使用原文語言）",
+  "comparison": "差異分析",
+  "suggestion": "修改建議",
+  "revisedText": "修正後原文（⚠️ 必須使用與輸入原文相同的語言！）",
+  "finalTranslation": "修正後譯文（${targetLang}，專業出版級品質，自然流暢如母語）"
+}
+
+請只輸出 JSON。
+
+---
+
+**原文：**
+${sourceText}`;
+        },
+
+        async callAPI(sourceText, apiKey, targetLang) {
+            // 檢查是否已取消
+            if (state.isCancelled) {
+                throw new Error('CANCELLED');
+            }
+
+            let response;
+            try {
+                response = await fetch(CONFIG.API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey,
+                        'anthropic-version': '2023-06-01',
+                        'anthropic-dangerous-direct-browser-access': 'true'
+                    },
+                    body: JSON.stringify({
+                        model: CONFIG.MODEL,
+                        max_tokens: CONFIG.MAX_TOKENS,
+                        messages: [
+                            { role: 'user', content: this.buildPrompt(sourceText, targetLang) }
+                        ]
+                    })
+                });
+            } catch (networkError) {
+                console.error('Network error:', networkError);
+                throw new Error('網路連線失敗，請檢查網路狀態');
+            }
+
+            // 再次檢查是否已取消
+            if (state.isCancelled) {
+                throw new Error('CANCELLED');
+            }
+
+            if (!response.ok) {
+                let errorMsg = `API 錯誤: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    console.error('API error response:', errorData);
+                    if (errorData.error?.message) {
+                        errorMsg = errorData.error.message;
+                    }
+                } catch (e) {
+                    // 無法解析錯誤回應
+                }
+                throw new Error(errorMsg);
+            }
+
+            let data;
+            try {
+                data = await response.json();
+            } catch (e) {
+                console.error('Failed to parse response as JSON:', e);
+                throw new Error('無法解析 API 回應');
+            }
+
+            if (!data.content || !data.content[0] || !data.content[0].text) {
+                console.error('Unexpected response structure:', data);
+                throw new Error('API 回應結構異常');
+            }
+
+            const content = data.content[0].text;
+            return utils.parseJSON(content);
+        },
+
+        async callWithRetry(sourceText, apiKey, targetLang) {
+            let lastError;
+            
+            for (let attempt = 0; attempt <= CONFIG.RETRY_ATTEMPTS; attempt++) {
+                try {
+                    // 檢查是否已取消
+                    if (state.isCancelled) {
+                        throw new Error('CANCELLED');
+                    }
+                    
+                    return await this.callAPI(sourceText, apiKey, targetLang);
+                } catch (error) {
+                    lastError = error;
+                    
+                    // 如果是取消操作，直接拋出
+                    if (error.message === 'CANCELLED') {
+                        throw error;
+                    }
+                    
+                    // 最後一次嘗試失敗，拋出錯誤
+                    if (attempt === CONFIG.RETRY_ATTEMPTS) {
+                        throw error;
+                    }
+                    
+                    // 以下情況進行重試
+                    const shouldRetry = 
+                        error.message.includes('JSON') ||
+                        error.message.includes('parse') ||
+                        error.message.includes('解析') ||
+                        error.message.includes('異常') ||
+                        error.message.includes('重試') ||
+                        error.message.includes('overloaded') ||
+                        error.message.includes('timeout') ||
+                        error.message.includes('網路');
+                    
+                    if (shouldRetry) {
+                        console.log(`嘗試 ${attempt + 1} 失敗，${CONFIG.RETRY_DELAY/1000}秒後重試...`, error.message);
+                        await utils.sleep(CONFIG.RETRY_DELAY);
+                        continue;
+                    }
+                    
+                    // 其他錯誤直接拋出（如 API Key 錯誤）
+                    throw error;
+                }
+            }
+            
+            throw lastError;
+        }
+    };
+
+    // ===== 主要功能 =====
+    const app = {
+        init() {
+            this.loadSettings();
+            this.bindEvents();
+        },
+
+        loadSettings() {
+            // 載入 API Key
+            const savedApiKey = localStorage.getItem(CONFIG.STORAGE_KEYS.API_KEY);
+            if (savedApiKey) {
+                dom.apiKey.value = savedApiKey;
+            }
+
+            // 載入主題
+            const savedTheme = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME) || 'dark';
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        },
+
+        bindEvents() {
+            // 主題切換
+            dom.themeToggle.addEventListener('click', () => {
+                const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+                if (isLight) {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, 'dark');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, 'light');
+                }
+            });
+
+            // 保存 API Key
+            dom.apiKey.addEventListener('change', () => {
+                localStorage.setItem(CONFIG.STORAGE_KEYS.API_KEY, dom.apiKey.value);
+            });
+
+            // 分析按鈕
+            dom.analyzeBtn.addEventListener('click', () => this.analyze());
+            dom.autoAnalyzeBtn.addEventListener('click', () => this.autoAnalyze());
+            dom.cancelBtn.addEventListener('click', () => this.cancel());
+
+            // 快捷鍵
+            dom.sourceText.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    this.analyze();
+                }
+            });
+
+            // 複製按鈕
+            dom.copyRevisedBtn.addEventListener('click', () => {
+                ui.copyToClipboard(dom.revisedText.value, dom.copyRevisedBtn);
+            });
+            dom.copyFinalBtn.addEventListener('click', () => {
+                ui.copyToClipboard(dom.finalTranslation.textContent, dom.copyFinalBtn);
+            });
+
+            // 循環分析
+            dom.cycleBtn.addEventListener('click', () => {
+                const revisedText = dom.revisedText.value.trim();
+                if (revisedText) {
+                    dom.sourceText.value = revisedText;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setTimeout(() => this.analyze(), 500);
+                }
+            });
+
+            // 可摺疊卡片
+            document.querySelectorAll('.result-card.collapsible .card-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const card = header.closest('.result-card');
+                    card.classList.toggle('expanded');
+                });
+            });
+        },
+
+        validate() {
+            const apiKey = dom.apiKey.value.trim();
+            const sourceText = dom.sourceText.value.trim();
+
+            if (!apiKey) {
+                ui.showMessage('請輸入 API Key');
+                return false;
+            }
+
+            if (!apiKey.startsWith('sk-ant-')) {
+                ui.showMessage('API Key 格式不正確，應以 sk-ant- 開頭');
+                return false;
+            }
+
+            if (!sourceText) {
+                ui.showMessage('請輸入要分析的原文');
+                return false;
+            }
+
+            return true;
+        },
+
+        cancel() {
+            state.isCancelled = true;
+        },
+
+        async analyze() {
+            if (!this.validate()) return;
+
+            ui.hideMessage();
+            ui.clearHistory();
+            ui.showHistory(false);
+            ui.setProcessing(true, 'single');
+
+            state.isCancelled = false;
+
+            try {
+                const result = await api.callWithRetry(
+                    dom.sourceText.value.trim(),
+                    dom.apiKey.value.trim(),
+                    dom.targetLang.value
+                );
+
+                ui.updateResults(result);
+                ui.showResults(true);
+                ui.scrollTo(dom.resultsSection);
+
+            } catch (error) {
+                if (error.message === 'CANCELLED') {
+                    ui.showMessage('分析已取消', 'info');
+                } else {
+                    ui.showMessage(error.message);
+                }
+            } finally {
+                ui.setProcessing(false);
+            }
+        },
+
+        async autoAnalyze() {
+            if (!this.validate()) return;
+
+            const totalRounds = 3; // 固定 3 輪
+            let sourceText = dom.sourceText.value.trim();
+            const apiKey = dom.apiKey.value.trim();
+            const targetLang = dom.targetLang.value;
+
+            ui.hideMessage();
+            ui.clearHistory();
+            ui.setProcessing(true, 'auto');
+            ui.showProgress(true);
+            ui.showHistory(true);
+            ui.initProgressSteps(totalRounds);
+
+            state.isCancelled = false;
+            state.currentRound = 0;
+            state.totalRounds = totalRounds;
+
+            try {
+                for (let round = 1; round <= totalRounds; round++) {
+                    // 檢查是否已取消
+                    if (state.isCancelled) {
+                        throw new Error('CANCELLED');
+                    }
+
+                    state.currentRound = round;
+                    
+                    // 更新進度 UI
+                    ui.updateProgress(round - 0.5, totalRounds, `正在進行第 ${round}/${totalRounds} 輪分析...`);
+                    ui.updateStepStatus(round, 'active');
+                    dom.autoAnalyzeBtn.innerHTML = `<div class="spinner"></div>第 ${round}/${totalRounds} 輪`;
+
+                    // 呼叫 API
+                    const result = await api.callWithRetry(
+                        sourceText,
+                        apiKey,
+                        targetLang
+                    );
+
+                    // 記錄歷史
+                    state.history.push({
+                        round,
+                        original: sourceText,
+                        revised: result.revisedText
+                    });
+                    ui.addHistoryItem(round, sourceText, result.revisedText);
+                    ui.updateStepStatus(round, 'done');
+                    ui.updateProgress(round, totalRounds);
+
+                    // 更新結果（每輪都更新，以便中斷時也能看到進度）
+                    ui.updateResults(result);
+                    ui.showResults(true);
+
+                    // 準備下一輪
+                    sourceText = result.revisedText;
+                }
+
+                // 完成後更新原文欄位
+                dom.sourceText.value = sourceText;
+                ui.updateProgress(totalRounds, totalRounds, `✓ 完成 ${totalRounds} 輪自動優化！`);
+                ui.scrollTo(dom.historySection);
+
+                // 延遲隱藏進度條
+                setTimeout(() => {
+                    ui.showProgress(false);
+                }, 3000);
+
+            } catch (error) {
+                if (error.message === 'CANCELLED') {
+                    const completedRounds = state.currentRound - 1;
+                    if (completedRounds > 0) {
+                        ui.showMessage(`已取消。已完成 ${completedRounds}/${totalRounds} 輪優化。`, 'info');
+                    } else {
+                        ui.showMessage('分析已取消', 'info');
+                    }
+                } else {
+                    const completedRounds = state.currentRound - 1;
+                    if (completedRounds > 0) {
+                        ui.showMessage(`第 ${state.currentRound} 輪發生錯誤：${error.message}。已完成 ${completedRounds} 輪優化。`);
+                    } else {
+                        ui.showMessage(error.message);
+                    }
+                }
+                ui.showProgress(false);
+            } finally {
+                ui.setProcessing(false);
+            }
+        }
+    };
+
+    // ===== 初始化 =====
+    app.init();
+    </script>
+</body>
+</html>
